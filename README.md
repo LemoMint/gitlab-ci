@@ -1,0 +1,16 @@
+-[ ] wait, until gitlab-ce service has status "healthy"
+-[ ] configure /etc/hosts: 
+  - 127.0.0.1 gitlab.local
+  - 127.0.0.1 registry.gitlab.local
+
+-[ ] docker exec -it gitlab-ce grep 'Password:' /etc/gitlab/root_initial_password
+-[ ] turn off sign-up enabled
+-[ ] set root password
+-[ ] create non-root user
+-[ ] register runner
+  - go to http://gitlab.local/admin/runners and copy token
+  - docker exec -it gitlab-runner gitlab-runner register --url "http://gitlab.local" --clone-url "http://gitlab.local"
+  - sudo vim[optional nano, cat > ...] gitlab/gitlab/gitlab-runner/config.toml
+    - set privileged = true
+    - add network_mode = "gitlab-network" 
+  - docker-compose restart
