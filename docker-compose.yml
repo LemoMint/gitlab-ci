@@ -47,7 +47,7 @@ services:
     container_name: gitlab-runner
     restart: always
     environment:
-      - DOCKER_OPTS="--insecure-registry registry.gitlab.local:5005"
+      - DOCKER_OPTS="--insecure-registry registry.gitlab.local:5050"
     depends_on:
       - web
     deploy:
