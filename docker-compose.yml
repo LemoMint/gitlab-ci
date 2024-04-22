@@ -1,0 +1,70 @@
+version: '3.9'
+services:
+  web:
+    image: 'gitlab/gitlab-ce:latest'
+    restart: always
+    hostname: 'gitlab.local'
+    container_name: gitlab-ce
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        registry_external_url 'http://registry.gitlab.local'
+        registry['enable'] = true
+        registry['token_realm'] = "http://gitlab.local"
+        gitlab_rails['registry_enabled'] = true
+        gitlab_rails['registry_path'] = "/var/opt/gitlab/gitlab-rails/shared/registry"
+        gitlab_rails['registry_api_url'] = "http://localhost:5000"
+        gitlab_rails['gitlab_shell_ssh_port'] = 8822
+        registry_nginx['enable'] = true
+        registry_nginx['listen_https'] = false
+        registry_nginx['listen_port'] = 5050
+        nginx['listen_port'] = 80
+        nginx['listen_https'] = false
+    ports:
+      - '80:80'
+      - '443:443'
+      - '8822:22'
+      - '5050:5050'
+      - '5000:5000'
+      - '2375:2375'
+    deploy:
+      resources:
+        limits:
+          cpus: '4.0'
+          memory: 6000M
+        reservations:
+          cpus: '4.0'
+          memory: 5000M
+    volumes:
+      - './gitlab/gitlab/config:/etc/gitlab'
+      - './gitlab/gitlab/logs:/var/log/gitlab'
+      - './gitlab/gitlab/data:/var/opt/gitlab'
+      - '/etc/hosts:/etc/hosts:ro'
+    networks:
+      - gitlab
+
+  gitlab-runner:
+    image: gitlab/gitlab-runner:alpine
+    container_name: gitlab-runner
+    restart: always
+    environment:
+      - DOCKER_OPTS="--insecure-registry registry.gitlab.local:5005"
+    depends_on:
+      - web
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 200M
+        reservations:
+          cpus: '1.0'
+          memory: 200M
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - './gitlab/gitlab/gitlab-runner:/etc/gitlab-runner'
+      - '/etc/hosts:/etc/hosts:ro'
+    networks:
+      - gitlab
+
+networks:
+  gitlab:
+    name: gitlab-network
