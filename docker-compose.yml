@@ -7,7 +7,7 @@ services:
     container_name: gitlab-ce
     environment:
       GITLAB_OMNIBUS_CONFIG: |
-        registry_external_url 'http://registry.gitlab.local'
+        registry_external_url 'http://registry.gitlab.local:5050'
         registry['enable'] = true
         registry['token_realm'] = "http://gitlab.local"
         gitlab_rails['registry_enabled'] = true
